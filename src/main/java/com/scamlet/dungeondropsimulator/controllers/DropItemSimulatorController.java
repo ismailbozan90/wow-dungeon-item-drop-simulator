@@ -18,23 +18,23 @@ import java.util.List;
 @RequestMapping("/api")
 public class DropItemSimulatorController {
 
-   private final CharacterService characterService;
-   private final DungeonService dungeonService;
+    private final CharacterService characterService;
+    private final DungeonService dungeonService;
 
-   @Autowired
-   public DropItemSimulatorController(CharacterService characterService, DungeonService dungeonService) {
+    @Autowired
+    public DropItemSimulatorController(CharacterService characterService, DungeonService dungeonService) {
         this.characterService = characterService;
         this.dungeonService = dungeonService;
     }
 
     @GetMapping("/getdroplist")
     public ResponseEntity<List<List<Item>>> getDropList() {
-       List<List<Item>> itemDropList = dungeonService.getDropListAll();
-       if (itemDropList.isEmpty()) {
-           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-       }
+        List<List<Item>> itemDropList = dungeonService.getDropListAll();
+        if (itemDropList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
 
-       return ResponseEntity.ok(itemDropList);
+        return ResponseEntity.ok(itemDropList);
     }
 
     @GetMapping("/getdrop/{name}")
@@ -48,20 +48,35 @@ public class DropItemSimulatorController {
 
     }
 
-    @GetMapping("/sim/{name}/{spec}")
-    public ResponseEntity<List<Item>> simpleSimulation(@PathVariable String name, @PathVariable String spec) {
-       Spec findSpec = characterService.findSpec(spec);
-       if (findSpec == null) {
-           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-       }
+    @GetMapping("/simlist/{name}/{spec}")
+    public ResponseEntity<List<Item>> simpleSimulationList(@PathVariable String name, @PathVariable String spec) {
+        Spec findSpec = characterService.findSpec(spec);
+        if (findSpec == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
 
-       List<Item> itemDropList = dungeonService.simpleSimulation(name, findSpec);
+        List<Item> itemDropList = dungeonService.simpleSimulationList(name, findSpec);
         if (itemDropList.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
         return ResponseEntity.ok(itemDropList);
-
     }
+
+    @GetMapping("/sim/{name}/{spec}")
+    public ResponseEntity<Item> simpleSimulation(@PathVariable String name, @PathVariable String spec) {
+        Spec findSpec = characterService.findSpec(spec);
+        if (findSpec == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
+        Item item = dungeonService.simpleSimulation(name, findSpec);
+        if (item == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
+        return ResponseEntity.ok(item);
+    }
+
 
 }

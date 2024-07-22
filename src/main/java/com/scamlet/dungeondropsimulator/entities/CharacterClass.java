@@ -3,7 +3,7 @@ package com.scamlet.dungeondropsimulator.entities;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CharacterClass implements Utils  {
+public class CharacterClass implements Utils {
 
     private String name;
     private Set<Spec> spec;

@@ -12,7 +12,10 @@ public class Dungeon {
         this.itemDropPool = itemDropPool;
     }
 
-    public Dungeon() {};
+    public Dungeon() {
+    }
+
+    ;
 
     public String getName() {
         return name;

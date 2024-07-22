@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 @Service
@@ -108,7 +109,7 @@ public class DungeonService {
     }
 
     public boolean checkWeaponType(Set<Utils.WeaponType> weaponTypeSet, Utils.WeaponType targetWeaponType) {
-        for (Utils.WeaponType list: weaponTypeSet) {
+        for (Utils.WeaponType list : weaponTypeSet) {
             if (list == targetWeaponType) {
                 return true;
             }
@@ -123,16 +124,14 @@ public class DungeonService {
         return false;
     }
 
-    public List<Item> simpleSimulation(String dungeonName, Spec spec) {
+    public List<Item> simpleSimulationList(String dungeonName, Spec spec) {
 
         List<Item> dungeonDropList = getDropList(dungeonName);
         List<Item> result = new ArrayList<>();
         if (dungeonDropList.isEmpty()) {
             return null;
-        }
-        else {
+        } else {
             for (Item item : dungeonDropList) {
-                System.out.println(item.getName());
                 boolean canAdd = item.getWeaponType() != Utils.WeaponType.NONE && checkWeaponType(spec.getWeaponType(), item.getWeaponType());
 
                 canAdd = item.getArmorType() != Utils.ArmorType.NONE && checkArmorType(spec.getArmorType(), item.getArmorType());
@@ -146,5 +145,36 @@ public class DungeonService {
         }
 
         return result;
+    }
+
+    public Item simpleSimulation(String dungeonName, Spec spec) {
+
+        List<Item> dungeonDropList = getDropList(dungeonName);
+        List<Item> result = new ArrayList<>();
+        if (dungeonDropList.isEmpty()) {
+            return null;
+        } else {
+            for (Item item : dungeonDropList) {
+                boolean canAdd = item.getWeaponType() != Utils.WeaponType.NONE && checkWeaponType(spec.getWeaponType(), item.getWeaponType());
+
+                canAdd = item.getArmorType() != Utils.ArmorType.NONE && checkArmorType(spec.getArmorType(), item.getArmorType());
+
+                canAdd = item.getPrimaryStat() == Utils.PrimaryStat.ALL || item.getPrimaryStat() == spec.getPrimaryStat();
+
+                if (canAdd) {
+                    result.add(item);
+                }
+            }
+        }
+
+        Random rand = new Random();
+        int dropChance = rand.nextInt(5) + 1;
+        int randomNumber = rand.nextInt(result.toArray().length) + 1;
+
+        if (dropChance <= 2) {
+            return result.get(randomNumber);
+        }
+
+        return null;
     }
 }

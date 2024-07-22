@@ -8,7 +8,8 @@ public class Item implements Utils {
     private ItemType itemType;
     private ArmorType armorType;
 
-    public Item () {}
+    public Item() {
+    }
 
     public String getName() {
         return name;
