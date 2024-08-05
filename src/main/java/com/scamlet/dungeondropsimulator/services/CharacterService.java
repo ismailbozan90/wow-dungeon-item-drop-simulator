@@ -5,9 +5,8 @@ import com.scamlet.dungeondropsimulator.entities.Spec;
 import com.scamlet.dungeondropsimulator.entities.Utils;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 @Service
 public class CharacterService {
@@ -27,14 +26,15 @@ public class CharacterService {
 
         CharacterClass paladin = new CharacterClass();
 
-        Spec retri = new Spec();
-        retri.setName("Retribution");
-        retri.setRole(Spec.Role.DPS);
-        retri.setArmorType(Utils.ArmorType.PLATE);
-        retri.setPrimaryStat(Utils.PrimaryStat.STRENGTH);
-        retri.addWeaponType(Utils.WeaponType.SWORD_2H);
-        retri.addWeaponType(Utils.WeaponType.POLEARM);
-        retri.addWeaponType(Utils.WeaponType.MACE_2H);
+        Spec retribution = new Spec();
+        retribution.setName("Retribution");
+        retribution.setRole(Spec.Role.DPS);
+        retribution.setArmorType(Utils.ArmorType.PLATE);
+        retribution.setPrimaryStat(Utils.PrimaryStat.STRENGTH);
+        retribution.addWeaponType(Utils.WeaponType.SWORD_2H);
+        retribution.addWeaponType(Utils.WeaponType.POLEARM);
+        retribution.addWeaponType(Utils.WeaponType.MACE_2H);
+        retribution.addWeaponType(Utils.WeaponType.AXE_2H);
 
         Spec holy = new Spec();
         holy.setName("Holy");
@@ -45,35 +45,28 @@ public class CharacterService {
         holy.addWeaponType(Utils.WeaponType.SHIELD);
         holy.addWeaponType(Utils.WeaponType.MACE_1H);
 
-        Spec prot = new Spec();
-        prot.setName("Protection");
-        prot.setRole(Spec.Role.TANK);
-        prot.setArmorType(Utils.ArmorType.PLATE);
-        prot.setPrimaryStat(Utils.PrimaryStat.STRENGTH);
-        prot.addWeaponType(Utils.WeaponType.SWORD_1H);
-        prot.addWeaponType(Utils.WeaponType.SHIELD);
-        prot.addWeaponType(Utils.WeaponType.MACE_1H);
+        Spec protection = new Spec();
+        protection.setName("Protection");
+        protection.setRole(Spec.Role.TANK);
+        protection.setArmorType(Utils.ArmorType.PLATE);
+        protection.setPrimaryStat(Utils.PrimaryStat.STRENGTH);
+        protection.addWeaponType(Utils.WeaponType.SWORD_1H);
+        protection.addWeaponType(Utils.WeaponType.SHIELD);
+        protection.addWeaponType(Utils.WeaponType.MACE_1H);
 
-        paladin.addSpec(retri);
+        paladin.addSpec(retribution);
         paladin.addSpec(holy);
-        paladin.addSpec(prot);
+        paladin.addSpec(protection);
 
         characterData.add(paladin);
 
     }
 
-    public Spec findSpec(String name) {
-
-        for (CharacterClass characterClass : characterData) {
-            Set<Spec> tempSpecSet = characterClass.getSpec();
-            for (Spec spec : tempSpecSet) {
-                if (spec.getName().equals(name)) {
-                    return spec;
-                }
-            }
-        }
-
-        return null;
+    public Optional<Spec> findSpec(String name) {
+        return characterData.stream()
+                .flatMap(characterClass -> characterClass.getSpec().stream())
+                .filter(spec -> spec.getName().equals(name))
+                .findFirst();
     }
 
 

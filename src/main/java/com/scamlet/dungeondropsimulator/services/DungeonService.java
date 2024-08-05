@@ -7,16 +7,13 @@ import com.scamlet.dungeondropsimulator.entities.Utils;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class DungeonService {
 
 
-    private List<Dungeon> dungeonData;
+    private final List<Dungeon> dungeonData;
 
     public DungeonService(List<Dungeon> dungeonData) {
         this.dungeonData = dungeonData;
@@ -32,7 +29,7 @@ public class DungeonService {
         Dungeon ruby = new Dungeon();
         ruby.setName("Ruby Life Pools");
 
-        List<Item> itemDropList = new ArrayList<Item>();
+        List<Item> itemDropList = new ArrayList<>();
 
         Item i1 = new Item();
         i1.setName("Chillworn's Infusion Staff");
@@ -89,92 +86,71 @@ public class DungeonService {
     }
 
     public List<List<Item>> getDropListAll() {
-        List<List<Item>> allItems = new ArrayList<>();
-        for (Dungeon d : dungeonData) {
-            allItems.add(d.getItemDropPool());
-        }
+        return Collections.singletonList(dungeonData.stream()
+                .map(Dungeon::getItemDropPool)
+                .findFirst()
+                .orElse(null));
 
-        return allItems;
     }
 
     public List<Item> getDropList(String name) {
-
-        for (Dungeon d : dungeonData) {
-            if (d.getName().equals(name)) {
-                return d.getItemDropPool();
-            }
-        }
-
-        return null;
+        return dungeonData.stream()
+                .filter(dungeon -> dungeon.getName().equals(name))
+                .map(Dungeon::getItemDropPool)
+                .findFirst()
+                .orElse(null);
     }
 
-    public boolean checkWeaponType(Set<Utils.WeaponType> weaponTypeSet, Utils.WeaponType targetWeaponType) {
-        for (Utils.WeaponType list : weaponTypeSet) {
-            if (list == targetWeaponType) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean checkArmorType(Utils.ArmorType armorType, Utils.ArmorType targetArmorType) {
-        if (armorType == targetArmorType) {
-            return true;
-        }
-        return false;
-    }
-
-    public List<Item> simpleSimulationList(String dungeonName, Spec spec) {
-
+    public Optional<List<Item>> simpleSimulationList(String dungeonName, Optional<Spec> spec) {
         List<Item> dungeonDropList = getDropList(dungeonName);
-        List<Item> result = new ArrayList<>();
         if (dungeonDropList.isEmpty()) {
-            return null;
-        } else {
-            for (Item item : dungeonDropList) {
-                boolean canAdd = item.getWeaponType() != Utils.WeaponType.NONE && checkWeaponType(spec.getWeaponType(), item.getWeaponType());
-
-                canAdd = item.getArmorType() != Utils.ArmorType.NONE && checkArmorType(spec.getArmorType(), item.getArmorType());
-
-                canAdd = item.getPrimaryStat() == Utils.PrimaryStat.ALL || item.getPrimaryStat() == spec.getPrimaryStat();
-
-                if (canAdd) {
-                    result.add(item);
-                }
-            }
+            return Optional.empty();
         }
 
-        return result;
+        return Optional.ofNullable(simResultList(dungeonDropList, spec));
     }
 
-    public Item simpleSimulation(String dungeonName, Spec spec) {
-
+    public Optional<Item> simpleSimulation(String dungeonName, Optional<Spec> spec) {
         List<Item> dungeonDropList = getDropList(dungeonName);
-        List<Item> result = new ArrayList<>();
+
         if (dungeonDropList.isEmpty()) {
-            return null;
-        } else {
-            for (Item item : dungeonDropList) {
-                boolean canAdd = item.getWeaponType() != Utils.WeaponType.NONE && checkWeaponType(spec.getWeaponType(), item.getWeaponType());
+            return Optional.empty();
+        }
 
-                canAdd = item.getArmorType() != Utils.ArmorType.NONE && checkArmorType(spec.getArmorType(), item.getArmorType());
+        List<Item> result = simResultList(dungeonDropList, spec);
 
-                canAdd = item.getPrimaryStat() == Utils.PrimaryStat.ALL || item.getPrimaryStat() == spec.getPrimaryStat();
+        if (!result.isEmpty()) {
+            Random rand = new Random();
+            int dropChance = rand.nextInt(5) + 1;
 
-                if (canAdd) {
-                    result.add(item);
-                }
+            if (dropChance <= 2) {
+                int randomNumber = rand.nextInt(result.size());
+                return Optional.of(result.get(randomNumber));
             }
         }
+        return Optional.empty();
+    }
 
-        Random rand = new Random();
-        int dropChance = rand.nextInt(5) + 1;
-        int randomNumber = rand.nextInt(result.toArray().length) + 1;
+    public List<Item> simResultList(List<Item> dungeonDropList, Optional<Spec> spec) {
+        return dungeonDropList.stream().filter(item -> {
 
-        if (dropChance <= 2) {
-            return result.get(randomNumber);
-        }
+            if (spec.isEmpty()) {
+                return false;
+            }
 
-        return null;
+            //Weapon Control
+            if (item.getWeaponType() != Utils.WeaponType.NONE && !Utils.WeaponType.checkWeaponType(spec.get().getWeaponType(), item.getWeaponType())) {
+                return false;
+            }
+
+            //Armor Control
+            if (item.getArmorType() != Utils.ArmorType.NONE && !Utils.ArmorType.checkArmorType(spec.get().getArmorType(), item.getArmorType())) {
+                return false;
+            }
+
+            //Primary Stat Control
+            return item.getPrimaryStat() == Utils.PrimaryStat.ALL || item.getPrimaryStat() == spec.get().getPrimaryStat();
+
+        }).toList();
     }
 }

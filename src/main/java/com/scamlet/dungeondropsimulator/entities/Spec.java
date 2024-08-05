@@ -1,8 +1,10 @@
 package com.scamlet.dungeondropsimulator.entities;
 
+import lombok.Data;
 import java.util.EnumSet;
 import java.util.Set;
 
+@Data
 public class Spec implements Utils {
 
     public enum Role {
@@ -19,47 +21,9 @@ public class Spec implements Utils {
         this.weaponType = EnumSet.noneOf(WeaponType.class);
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public PrimaryStat getPrimaryStat() {
-        return primaryStat;
-    }
-
-    public void setPrimaryStat(PrimaryStat primaryStat) {
-        this.primaryStat = primaryStat;
-    }
-
-    public Set<WeaponType> getWeaponType() {
-        return weaponType;
-    }
-
     public void addWeaponType(WeaponType weaponType) {
         this.weaponType.add(weaponType);
     }
 
-    public void setWeaponType(Set<WeaponType> weaponType) {
-        this.weaponType = weaponType;
-    }
 
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public ArmorType getArmorType() {
-        return armorType;
-    }
-
-    public void setArmorType(ArmorType armorType) {
-        this.armorType = armorType;
-    }
 }
